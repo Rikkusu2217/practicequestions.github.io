@@ -243,7 +243,7 @@
     <script>
         let allResponses = [];
 
-        // Load responses from local storage
+        // Load responses from Firebase
         window.loadResponses = async function() {
             const loadingIndicator = document.getElementById('loadingIndicator');
             const errorMessage = document.getElementById('errorMessage');
@@ -254,16 +254,14 @@
             errorMessage.style.display = 'none';
 
             try {
-                // Load from local storage
-                const stored = localStorage.getItem('quizResponses');
-                if (stored) {
-                    allResponses = JSON.parse(stored);
-                } else {
-                    allResponses = [];
+                // Load from Firebase
+                allResponses = await window.loadFromFirebase();
+
+                if (allResponses.length > 0) {
+                    setupGuide.style.display = 'none';
                 }
 
                 displayResponses();
-                setupGuide.style.display = 'none';
                 responsesSection.style.display = 'block';
                 loadingIndicator.style.display = 'none';
 
@@ -307,7 +305,7 @@
                 for (let i = 1; i <= 10; i++) {
                     const answerKey = `question_${i}`;
                     if (response[answerKey]) {
-                const questions = [
+                        const questions = [
                             "What's your favorite color?",
                             "What's your favorite food or meal?",
                             "What's your favorite drink?",
@@ -319,16 +317,14 @@
                             "What activities do you enjoy (movies, bowling, walking, etc.)?",
                             "What's something you've always wanted to try on a date?"
                         ];
-                            "Do you prefer staying in or going out?",
-                            "What's your ideal type of date — chill, fun, or adventurous?",
-                            "What activities do you enjoy (movies, bowling, walking, etc.)?",
-                            "What's something you've always wanted to try on a date?"
-                        ];
+                        
+                        const answerData = response[answerKey];
+                        const answerText = typeof answerData === 'object' ? answerData.answer : answerData;
                         
                         answersHTML += `
                             <div class="answer">
                                 <strong>Q${i}: ${questions[i-1]}</strong>
-                                <span>${response[answerKey]}</span>
+                                <span>${answerText}</span>
                             </div>
                         `;
                     }

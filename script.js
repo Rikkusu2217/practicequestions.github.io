@@ -120,17 +120,31 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 });
 
-// Save response to localStorage only
+// Save response to Firebase and localStorage
 async function saveResponse() {
     const response = {
         timestamp: new Date().toLocaleString(),
         answers: [...userAnswers]
     };
     
-    // Save to localStorage
+    // Save to localStorage as backup
     allResponses.push(response);
     localStorage.setItem('quizResponses', JSON.stringify(allResponses));
-    console.log("✅ Response saved locally!");
+    
+    // Try to save to Firebase
+    if (window.saveToFirebase) {
+        const answersData = {};
+        quizData.forEach((q, index) => {
+            answersData[`question_${index + 1}`] = {
+                question: q.question,
+                answer: userAnswers[index]
+            };
+        });
+        
+        await window.saveToFirebase(answersData);
+    }
+    
+    console.log("✅ Response saved!");
 }
 
 // Show results
