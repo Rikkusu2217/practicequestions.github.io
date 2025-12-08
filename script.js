@@ -1,0 +1,218 @@
+// Import Firebase
+import { db } from './firebase-config.js';
+import { collection, addDoc } from "https://www.gstatic.com/firebaselibs/10.7.0/firebase-firestore.js";
+
+// Quiz data - Users will provide their own answers
+const quizData = [
+    {
+        question: "What's your favorite color?"
+    },
+    {
+        question: "What are your hobbies?"
+    },
+    {
+        question: "What do you like about me?"
+    },
+    {
+        question: "What's your favorite music genre?"
+    },
+    {
+        question: "Where's your favorite place to relax?"
+    },
+    {
+        question: "What's one fun fact about you?"
+    }
+];
+
+// Quiz state
+let currentQuestion = 0;
+let userAnswers = [];
+let quizStarted = false;
+let allResponses = JSON.parse(localStorage.getItem('quizResponses')) || [];
+
+// Start the quiz
+function startQuiz() {
+    quizStarted = true;
+    currentQuestion = 0;
+    userAnswers = [];
+    
+    document.getElementById('startScreen').classList.remove('active');
+    document.getElementById('quizScreen').classList.add('active');
+    
+    loadQuestion();
+    focusInput();
+}
+
+// Load current question
+function loadQuestion() {
+    const question = quizData[currentQuestion];
+    const totalQuestions = quizData.length;
+    
+    // Update progress bar
+    const progress = ((currentQuestion + 1) / totalQuestions) * 100;
+    document.getElementById('progressFill').style.width = progress + '%';
+    
+    // Update question number
+    document.getElementById('currentQuestion').textContent = currentQuestion + 1;
+    document.getElementById('totalQuestions').textContent = totalQuestions;
+    
+    // Display question
+    document.getElementById('questionText').textContent = question.question;
+    
+    // Clear and focus input
+    const answerInput = document.getElementById('answerInput');
+    answerInput.value = userAnswers[currentQuestion] || '';
+    focusInput();
+}
+
+// Focus on the input field
+function focusInput() {
+    setTimeout(() => {
+        document.getElementById('answerInput').focus();
+    }, 100);
+}
+
+// Go to next question or finish quiz
+function nextQuestion() {
+    const answerInput = document.getElementById('answerInput');
+    const answer = answerInput.value.trim();
+    
+    if (!answer) {
+        alert('Please provide an answer before continuing!');
+        return;
+    }
+    
+    // Store answer
+    userAnswers[currentQuestion] = answer;
+    
+    // Move to next question
+    currentQuestion++;
+    
+    if (currentQuestion < quizData.length) {
+        loadQuestion();
+    } else {
+        // Quiz finished - save and show results
+        saveResponse();
+        showResults();
+    }
+}
+
+// Allow Enter key to go to next question
+document.addEventListener('DOMContentLoaded', function() {
+    const answerInput = document.getElementById('answerInput');
+    if (answerInput) {
+        answerInput.addEventListener('keypress', function(event) {
+            if (event.key === 'Enter') {
+                nextQuestion();
+            }
+        });
+    }
+});
+
+// Save response to Firebase and localStorage
+async function saveResponse() {
+    const response = {
+        timestamp: new Date().toLocaleString(),
+        answers: [...userAnswers],
+        submittedAt: new Date().toISOString()
+    };
+    
+    // Save to localStorage
+    allResponses.push(response);
+    localStorage.setItem('quizResponses', JSON.stringify(allResponses));
+    
+    // Save to Firebase
+    try {
+        const responsesCollection = collection(db, 'quiz_responses');
+        
+        // Create a document with all answers
+        const responseDoc = {
+            timestamp: response.timestamp,
+            submittedAt: response.submittedAt
+        };
+        
+        // Add each answer as a field
+        quizData.forEach((q, index) => {
+            responseDoc[`question_${index + 1}`] = userAnswers[index];
+        });
+        
+        await addDoc(responsesCollection, responseDoc);
+        console.log("✅ Response saved to Firebase successfully!");
+    } catch (error) {
+        console.error("Error saving to Firebase:", error);
+        alert('Response saved locally (Firebase not configured)');
+    }
+}
+
+// Show results
+function showResults() {
+    document.getElementById('quizScreen').classList.remove('active');
+    document.getElementById('resultsScreen').classList.add('active');
+    
+    // Display user's responses
+    displayResults();
+}
+
+// Display detailed results
+function displayResults() {
+    const resultsList = document.getElementById('resultsList');
+    resultsList.innerHTML = '';
+    
+    quizData.forEach((question, index) => {
+        const userAnswer = userAnswers[index];
+        
+        const resultItem = document.createElement('div');
+        resultItem.className = 'result-item';
+        resultItem.innerHTML = `
+            <strong>${index + 1}. ${question.question}</strong>
+            <span>${userAnswer}</span>
+        `;
+        
+        resultsList.appendChild(resultItem);
+    });
+}
+
+// Download CSV file
+function downloadCSV() {
+    // Create CSV content
+    let csvContent = 'data:text/csv;charset=utf-8,';
+    
+    // Add header
+    const headers = ['Timestamp', ...quizData.map((q, i) => `Question ${i + 1}: ${q.question}`)];
+    csvContent += headers.map(h => `"${h}"`).join(',') + '\n';
+    
+    // Add all responses
+    allResponses.forEach(response => {
+        const row = [
+            response.timestamp,
+            ...response.answers.map(answer => `"${answer}"`)
+        ];
+        csvContent += row.join(',') + '\n';
+    });
+    
+    // Create download link
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement('a');
+    link.setAttribute('href', encodedUri);
+    link.setAttribute('download', `quiz_responses_${new Date().getTime()}.csv`);
+    document.body.appendChild(link);
+    
+    // Trigger download
+    link.click();
+    document.body.removeChild(link);
+    
+    alert('✅ CSV file downloaded!');
+}
+
+// Restart quiz
+function restartQuiz() {
+    document.getElementById('resultsScreen').classList.remove('active');
+    document.getElementById('startScreen').classList.add('active');
+    
+    // Show total responses collected
+    const totalResponses = allResponses.length;
+    if (totalResponses > 0) {
+        const messageDiv = document.querySelector('#startScreen p');
+        messageDiv.textContent = `Total responses collected: ${totalResponses} 📊\n\nLet's see how much you know about me...`;
+    }
+}

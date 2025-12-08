@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>How Well Do You Know Me? 💕</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Title Section -->
+        <div class="header">
+            <h1>💕 How Well Do You Know Me? 💕</h1>
+            <p class="subtitle">Let's see how much you know about me...</p>
+        </div>
+
+        <!-- Quiz Container -->
+        <div class="quiz-container">
+            <!-- Start Screen -->
+            <div id="startScreen" class="screen active">
+                <h2>Ready to take the quiz?</h2>
+                <p>Answer some fun questions about me and let's see your score!</p>
+                <button class="btn btn-start" onclick="startQuiz()">Start Quiz 🎯</button>
+            </div>
+
+            <!-- Quiz Screen -->
+            <div id="quizScreen" class="screen">
+                <div class="progress-bar">
+                    <div id="progressFill" class="progress-fill"></div>
+                </div>
+                <div class="question-number">
+                    <span id="currentQuestion">1</span> / <span id="totalQuestions">6</span>
+                </div>
+                
+                <h2 id="questionText"></h2>
+                
+                <input type="text" id="answerInput" class="answer-input" placeholder="Type your answer here..." autocomplete="off">
+                
+                <button class="btn btn-next" id="nextBtn" onclick="nextQuestion()">Next Question →</button>
+            </div>
+
+            <!-- Results Screen -->
+            <div id="resultsScreen" class="screen">
+                <h2>Thank You! 💕</h2>
+                <p class="thank-you-msg">Your answers have been saved!</p>
+                
+                <div class="results-details">
+                    <h3>Your Responses:</h3>
+                    <div id="resultsList"></div>
+                </div>
+                
+                <div class="download-section">
+                    <p class="info-msg">Your responses are saved locally. You can download them as CSV:</p>
+                    <button class="btn btn-download" onclick="downloadCSV()">📥 Download CSV File</button>
+                </div>
+                
+                <button class="btn btn-restart" onclick="restartQuiz()">Submit Another Response 🔄</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Firebase SDK -->
+    <script type="module" src="firebase-config.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>

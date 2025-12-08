@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz Responses Dashboard 📊</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 40px;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+
+        .dashboard {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 15px;
+            text-align: center;
+        }
+
+        .stat-card h3 {
+            font-size: 2em;
+            margin-bottom: 5px;
+        }
+
+        .stat-card p {
+            font-size: 0.9em;
+            opacity: 0.9;
+        }
+
+        .responses-section {
+            margin-top: 40px;
+        }
+
+        .responses-section h2 {
+            color: #333;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #667eea;
+            padding-bottom: 10px;
+        }
+
+        .response-item {
+            background: #f9f9f9;
+            border-left: 4px solid #667eea;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-radius: 10px;
+        }
+
+        .response-item .timestamp {
+            font-size: 0.9em;
+            color: #999;
+            margin-bottom: 15px;
+        }
+
+        .response-item .answer {
+            margin-bottom: 10px;
+            padding: 10px;
+            background: white;
+            border-radius: 8px;
+            border-left: 3px solid #667eea;
+        }
+
+        .response-item .answer strong {
+            color: #667eea;
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        .response-item .answer span {
+            color: #333;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+            font-size: 1.2em;
+        }
+
+        .error {
+            background: #fee;
+            color: #c00;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            border-left: 4px solid #c00;
+        }
+
+        .setup-guide {
+            background: #e8f4f8;
+            border-left: 4px solid #0084ff;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+        }
+
+        .setup-guide h3 {
+            color: #0084ff;
+            margin-bottom: 10px;
+        }
+
+        .setup-guide ol {
+            margin-left: 20px;
+            color: #333;
+            line-height: 1.8;
+        }
+
+        .setup-guide code {
+            background: white;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: monospace;
+            color: #d83c3c;
+        }
+
+        .export-btn {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+            padding: 12px 30px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1em;
+            font-weight: 600;
+        }
+
+        .export-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(16, 185, 129, 0.4);
+        }
+
+        .no-responses {
+            text-align: center;
+            padding: 40px;
+            color: #999;
+        }
+
+        .no-responses p {
+            font-size: 1.2em;
+            margin-bottom: 15px;
+        }
+
+        .refresh-btn {
+            background: #667eea;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            margin-bottom: 20px;
+        }
+
+        .refresh-btn:hover {
+            background: #764ba2;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📊 Quiz Responses Dashboard</h1>
+            <p>View all responses from your crush's quiz</p>
+        </div>
+
+        <div class="dashboard">
+            <div class="setup-guide" id="setupGuide">
+                <h3>⚙️ Setup Required</h3>
+                <p>To see responses, you need to configure Firebase:</p>
+                <ol>
+                    <li>Go to <code>firebase-config.js</code> in your project</li>
+                    <li>Get your Firebase config from <a href="https://console.firebase.google.com" target="_blank">Firebase Console</a></li>
+                    <li>Replace the placeholder values with your actual config</li>
+                    <li>Make sure Firestore Database is enabled in test mode</li>
+                    <li>Refresh this page to see responses</li>
+                </ol>
+            </div>
+
+            <button class="refresh-btn" onclick="loadResponses()">🔄 Refresh Responses</button>
+
+            <div class="stats" id="stats"></div>
+
+            <div class="responses-section" id="responsesSection" style="display: none;">
+                <h2>All Responses</h2>
+                <button class="export-btn" onclick="exportToCSV()">📥 Export as CSV</button>
+                <div id="responsesList" style="margin-top: 20px;"></div>
+            </div>
+
+            <div id="loadingIndicator" class="loading">
+                Loading responses...
+            </div>
+
+            <div id="errorMessage" class="error" style="display: none;"></div>
+        </div>
+    </div>
+
+    <!-- Firebase SDK -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebaselibs/10.7.0/firebase-app.js";
+        import { getFirestore, collection, query, orderBy, getDocs } from "https://www.gstatic.com/firebaselibs/10.7.0/firebase-firestore.js";
+
+        // REPLACE WITH YOUR FIREBASE CONFIG
+        const firebaseConfig = {
+            apiKey: "AIzaSyCf2R7Cu0v6HUGcq2qqKzSGljnzpJYFEaU",
+            authDomain: "personal-quiz-f6614.firebaseapp.com",
+            projectId: "personal-quiz-f6614",
+            storageBucket: "personal-quiz-f6614.firebasestorage.app",
+            messagingSenderId: "837086937066",
+            appId: "1:837086937066:web:c740304d57e7c2c6f3fc93",
+            measurementId: "G-CXS3Q69PK2"
+        };
+
+        let db;
+        let allResponses = [];
+
+        try {
+            const app = initializeApp(firebaseConfig);
+            db = getFirestore(app);
+        } catch (error) {
+            console.error("Firebase initialization error:", error);
+        }
+
+        // Load responses from Firebase
+        window.loadResponses = async function() {
+            const loadingIndicator = document.getElementById('loadingIndicator');
+            const errorMessage = document.getElementById('errorMessage');
+            const responsesSection = document.getElementById('responsesSection');
+            const setupGuide = document.getElementById('setupGuide');
+
+            loadingIndicator.style.display = 'block';
+            errorMessage.style.display = 'none';
+
+            try {
+                if (!db) {
+                    throw new Error('Firebase not configured. Please update firebase-config.js');
+                }
+
+                const responsesCollection = collection(db, 'quiz_responses');
+                const q = query(responsesCollection, orderBy('submittedAt', 'desc'));
+                const snapshot = await getDocs(q);
+
+                allResponses = [];
+                snapshot.forEach(doc => {
+                    allResponses.push({
+                        id: doc.id,
+                        ...doc.data()
+                    });
+                });
+
+                displayResponses();
+                setupGuide.style.display = 'none';
+                responsesSection.style.display = 'block';
+                loadingIndicator.style.display = 'none';
+
+            } catch (error) {
+                console.error('Error loading responses:', error);
+                errorMessage.style.display = 'block';
+                errorMessage.textContent = '❌ Error: ' + error.message;
+                loadingIndicator.style.display = 'none';
+            }
+        }
+
+        // Display responses
+        function displayResponses() {
+            const responsesList = document.getElementById('responsesList');
+            const statsDiv = document.getElementById('stats');
+
+            // Update stats
+            statsDiv.innerHTML = `
+                <div class="stat-card">
+                    <h3>${allResponses.length}</h3>
+                    <p>Total Responses</p>
+                </div>
+                <div class="stat-card">
+                    <h3>${new Date().toLocaleDateString()}</h3>
+                    <p>Today's Date</p>
+                </div>
+            `;
+
+            if (allResponses.length === 0) {
+                responsesList.innerHTML = '<div class="no-responses"><p>No responses yet. Share the quiz link with her! 💕</p></div>';
+                return;
+            }
+
+            responsesList.innerHTML = '';
+            allResponses.forEach((response, index) => {
+                const responseDiv = document.createElement('div');
+                responseDiv.className = 'response-item';
+                
+                let answersHTML = '<div class="timestamp">📅 ' + response.timestamp + '</div>';
+                
+                for (let i = 1; i <= 6; i++) {
+                    const answerKey = `question_${i}`;
+                    if (response[answerKey]) {
+                        const questions = [
+                            "What's your favorite color?",
+                            "What are your hobbies?",
+                            "What do you like about me?",
+                            "What's your favorite music genre?",
+                            "Where's your favorite place to relax?",
+                            "What's one fun fact about you?"
+                        ];
+                        
+                        answersHTML += `
+                            <div class="answer">
+                                <strong>Q${i}: ${questions[i-1]}</strong>
+                                <span>${response[answerKey]}</span>
+                            </div>
+                        `;
+                    }
+                }
+                
+                responseDiv.innerHTML = answersHTML;
+                responsesList.appendChild(responseDiv);
+            });
+        }
+
+        // Export to CSV
+        window.exportToCSV = function() {
+            const questions = [
+                "What's your favorite color?",
+                "What are your hobbies?",
+                "What do you like about me?",
+                "What's your favorite music genre?",
+                "Where's your favorite place to relax?",
+                "What's one fun fact about you?"
+            ];
+
+            let csvContent = 'Timestamp,' + questions.map((q, i) => `"Question ${i + 1}: ${q}"`).join(',') + '\n';
+
+            allResponses.forEach(response => {
+                const answers = [];
+                for (let i = 1; i <= 6; i++) {
+                    answers.push(`"${response[`question_${i}`] || ''}"`);
+                }
+                csvContent += response.timestamp + ',' + answers.join(',') + '\n';
+            });
+
+            const encodedUri = encodeURI('data:text/csv;charset=utf-8,' + csvContent);
+            const link = document.createElement('a');
+            link.setAttribute('href', encodedUri);
+            link.setAttribute('download', `quiz_responses_${new Date().getTime()}.csv`);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        // Load responses on page load
+        window.addEventListener('load', loadResponses);
+    </script>
+</body>
+</html>
