@@ -21,11 +21,26 @@ const firebaseConfig = {
 };
 
 // Initialize Firebase
-import { initializeApp } from "https://www.gstatic.com/firebaselibs/10.7.0/firebase-app.js";
-import { getFirestore, collection, addDoc, query, getDocs, orderBy } from "https://www.gstatic.com/firebaselibs/10.7.0/firebase-firestore.js";
+async function initializeFirebase() {
+    try {
+        const firebaseApp = await import("https://www.gstatic.com/firebaselibs/10.7.0/firebase-app.js");
+        const firebaseFirestore = await import("https://www.gstatic.com/firebaselibs/10.7.0/firebase-firestore.js");
+        
+        const app = firebaseApp.initializeApp(firebaseConfig);
+        window.db = firebaseFirestore.getFirestore(app);
+        window.addDoc = firebaseFirestore.addDoc;
+        window.collection = firebaseFirestore.collection;
+        
+        console.log("✅ Firebase initialized successfully!");
+    } catch (error) {
+        console.error("⚠️ Firebase initialization error:", error);
+        console.log("Continuing without Firebase - responses will be saved locally only");
+    }
+}
 
-const app = initializeApp(firebaseConfig);
-export const db = getFirestore(app);
-
-// Test connection
-console.log("Firebase initialized successfully!");
+// Initialize Firebase on page load
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initializeFirebase);
+} else {
+    initializeFirebase();
+}

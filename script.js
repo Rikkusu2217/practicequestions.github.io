@@ -1,6 +1,5 @@
-// Import Firebase
-import { db } from './firebase-config.js';
-import { collection, addDoc } from "https://www.gstatic.com/firebaselibs/10.7.0/firebase-firestore.js";
+// Firebase initialization (will be available from firebase-config.js)
+let db = null;
 
 // Quiz data - Users will provide their own answers
 const quizData = [
@@ -121,26 +120,30 @@ async function saveResponse() {
     allResponses.push(response);
     localStorage.setItem('quizResponses', JSON.stringify(allResponses));
     
-    // Save to Firebase
+    // Save to Firebase if available
     try {
-        const responsesCollection = collection(db, 'quiz_responses');
-        
-        // Create a document with all answers
-        const responseDoc = {
-            timestamp: response.timestamp,
-            submittedAt: response.submittedAt
-        };
-        
-        // Add each answer as a field
-        quizData.forEach((q, index) => {
-            responseDoc[`question_${index + 1}`] = userAnswers[index];
-        });
-        
-        await addDoc(responsesCollection, responseDoc);
-        console.log("✅ Response saved to Firebase successfully!");
+        if (window.db && window.collection && window.addDoc) {
+            const responsesCollection = window.collection(window.db, 'quiz_responses');
+            
+            // Create a document with all answers
+            const responseDoc = {
+                timestamp: response.timestamp,
+                submittedAt: response.submittedAt
+            };
+            
+            // Add each answer as a field
+            quizData.forEach((q, index) => {
+                responseDoc[`question_${index + 1}`] = userAnswers[index];
+            });
+            
+            await window.addDoc(responsesCollection, responseDoc);
+            console.log("✅ Response saved to Firebase successfully!");
+        } else {
+            console.log("Firebase not available - response saved locally only");
+        }
     } catch (error) {
         console.error("Error saving to Firebase:", error);
-        alert('Response saved locally (Firebase not configured)');
+        console.log("Response saved locally");
     }
 }
 
