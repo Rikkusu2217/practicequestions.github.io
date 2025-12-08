@@ -120,39 +120,17 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 });
 
-// Save response to Firebase and localStorage
+// Save response to localStorage only
 async function saveResponse() {
     const response = {
         timestamp: new Date().toLocaleString(),
-        answers: [...userAnswers],
-        submittedAt: new Date().toISOString()
+        answers: [...userAnswers]
     };
     
     // Save to localStorage
     allResponses.push(response);
     localStorage.setItem('quizResponses', JSON.stringify(allResponses));
-    
-    // Save to Firebase if available
-    try {
-        if (window.saveToFirebase) {
-            const responseDoc = {
-                timestamp: response.timestamp,
-                submittedAt: response.submittedAt
-            };
-            
-            // Add each answer as a field
-            quizData.forEach((q, index) => {
-                responseDoc[`question_${index + 1}`] = userAnswers[index];
-            });
-            
-            await window.saveToFirebase(responseDoc);
-        } else {
-            console.log("Firebase not available - response saved locally only");
-        }
-    } catch (error) {
-        console.error("Error saving to Firebase:", error);
-        console.log("Response saved locally");
-    }
+    console.log("✅ Response saved locally!");
 }
 
 // Show results
@@ -212,7 +190,7 @@ function downloadCSV() {
     link.click();
     document.body.removeChild(link);
     
-    alert('✅ CSV file downloaded!');
+    alert('✅ CSV file downloaded! You can now share it or save it.');
 }
 
 // Restart quiz

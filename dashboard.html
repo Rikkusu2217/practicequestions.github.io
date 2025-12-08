@@ -238,12 +238,12 @@
         </div>
     </div>
 
-    <!-- Firebase Config -->
-    <script src="firebase-config.js?v=3"></script>
+    <!-- Quiz Config -->
+    <script src="firebase-config.js?v=4"></script>
     <script>
         let allResponses = [];
 
-        // Load responses from Firebase
+        // Load responses from local storage
         window.loadResponses = async function() {
             const loadingIndicator = document.getElementById('loadingIndicator');
             const errorMessage = document.getElementById('errorMessage');
@@ -254,7 +254,13 @@
             errorMessage.style.display = 'none';
 
             try {
-                allResponses = await window.loadFromFirebase();
+                // Load from local storage
+                const stored = localStorage.getItem('quizResponses');
+                if (stored) {
+                    allResponses = JSON.parse(stored);
+                } else {
+                    allResponses = [];
+                }
 
                 displayResponses();
                 setupGuide.style.display = 'none';
