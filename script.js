@@ -122,10 +122,10 @@ async function saveResponse() {
     
     // Save to Firebase if available
     try {
-        if (window.db) {
+        if (window.saveToFirebase) {
             const responseDoc = {
                 timestamp: response.timestamp,
-                submittedAt: firebase.firestore.Timestamp.fromDate(new Date())
+                submittedAt: response.submittedAt
             };
             
             // Add each answer as a field
@@ -133,8 +133,7 @@ async function saveResponse() {
                 responseDoc[`question_${index + 1}`] = userAnswers[index];
             });
             
-            await window.db.collection('quiz_responses').add(responseDoc);
-            console.log("✅ Response saved to Firebase successfully!");
+            await window.saveToFirebase(responseDoc);
         } else {
             console.log("Firebase not available - response saved locally only");
         }

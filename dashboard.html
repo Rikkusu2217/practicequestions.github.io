@@ -238,24 +238,9 @@
         </div>
     </div>
 
-    <!-- Firebase SDK -->
-    <script src="https://www.gstatic.com/firebaselibs/9.22.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebaselibs/9.22.0/firebase-firestore-compat.js"></script>
+    <!-- Firebase Config -->
+    <script src="firebase-config.js"></script>
     <script>
-        // Firebase Configuration
-        const firebaseConfig = {
-            apiKey: "AIzaSyCf2R7Cu0v6HUGcq2qqKzSGljnzpJYFEaU",
-            authDomain: "personal-quiz-f6614.firebaseapp.com",
-            projectId: "personal-quiz-f6614",
-            storageBucket: "personal-quiz-f6614.firebasestorage.app",
-            messagingSenderId: "837086937066",
-            appId: "1:837086937066:web:c740304d57e7c2c6f3fc93",
-            measurementId: "G-CXS3Q69PK2"
-        };
-
-        firebase.initializeApp(firebaseConfig);
-        const db = firebase.firestore();
-
         let allResponses = [];
 
         // Load responses from Firebase
@@ -269,15 +254,7 @@
             errorMessage.style.display = 'none';
 
             try {
-                const snapshot = await db.collection('quiz_responses').orderBy('submittedAt', 'desc').get();
-                
-                allResponses = [];
-                snapshot.forEach(doc => {
-                    allResponses.push({
-                        id: doc.id,
-                        ...doc.data()
-                    });
-                });
+                allResponses = await window.loadFromFirebase();
 
                 displayResponses();
                 setupGuide.style.display = 'none';
@@ -319,7 +296,7 @@
                 const responseDiv = document.createElement('div');
                 responseDiv.className = 'response-item';
                 
-                let answersHTML = '<div class="timestamp">📅 ' + response.timestamp + '</div>';
+                let answersHTML = '<div class="timestamp">📅 ' + (response.timestamp || 'Unknown') + '</div>';
                 
                 for (let i = 1; i <= 6; i++) {
                     const answerKey = `question_${i}`;
@@ -365,7 +342,7 @@
                 for (let i = 1; i <= 6; i++) {
                     answers.push(`"${response[`question_${i}`] || ''}"`);
                 }
-                csvContent += response.timestamp + ',' + answers.join(',') + '\n';
+                csvContent += (response.timestamp || 'Unknown') + ',' + answers.join(',') + '\n';
             });
 
             const encodedUri = encodeURI('data:text/csv;charset=utf-8,' + csvContent);
