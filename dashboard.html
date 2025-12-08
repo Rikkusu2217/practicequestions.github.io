@@ -239,11 +239,10 @@
     </div>
 
     <!-- Firebase SDK -->
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebaselibs/10.7.0/firebase-app.js";
-        import { getFirestore, collection, query, orderBy, getDocs } from "https://www.gstatic.com/firebaselibs/10.7.0/firebase-firestore.js";
-
-        // REPLACE WITH YOUR FIREBASE CONFIG
+    <script src="https://www.gstatic.com/firebaselibs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebaselibs/9.22.0/firebase-firestore-compat.js"></script>
+    <script>
+        // Firebase Configuration
         const firebaseConfig = {
             apiKey: "AIzaSyCf2R7Cu0v6HUGcq2qqKzSGljnzpJYFEaU",
             authDomain: "personal-quiz-f6614.firebaseapp.com",
@@ -254,15 +253,10 @@
             measurementId: "G-CXS3Q69PK2"
         };
 
-        let db;
-        let allResponses = [];
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
 
-        try {
-            const app = initializeApp(firebaseConfig);
-            db = getFirestore(app);
-        } catch (error) {
-            console.error("Firebase initialization error:", error);
-        }
+        let allResponses = [];
 
         // Load responses from Firebase
         window.loadResponses = async function() {
@@ -275,14 +269,8 @@
             errorMessage.style.display = 'none';
 
             try {
-                if (!db) {
-                    throw new Error('Firebase not configured. Please update firebase-config.js');
-                }
-
-                const responsesCollection = collection(db, 'quiz_responses');
-                const q = query(responsesCollection, orderBy('submittedAt', 'desc'));
-                const snapshot = await getDocs(q);
-
+                const snapshot = await db.collection('quiz_responses').orderBy('submittedAt', 'desc').get();
+                
                 allResponses = [];
                 snapshot.forEach(doc => {
                     allResponses.push({
