@@ -4,44 +4,45 @@ const firebaseConfig = {
   projectId: "personal-quiz-f6614"
 };
 
-// Firebase REST API for Firestore
+// Simple REST API calls for Firestore (no SDK needed)
 window.saveToFirebase = async function(responseDoc) {
     try {
-        const url = `https://firestore.googleapis.com/v1/projects/${firebaseConfig.projectId}/databases/(default)/documents/quiz_responses`;
-        
-        const payload = {
-            fields: {}
+        // Create a simple JSON document
+        const docData = {
+            fields: {
+                timestamp: { stringValue: responseDoc.timestamp || new Date().toLocaleString() },
+                submittedAt: { stringValue: responseDoc.submittedAt || new Date().toISOString() }
+            }
         };
         
-        // Convert answers to Firestore format
-        for (const [key, value] of Object.entries(responseDoc)) {
-            if (key === 'submittedAt') {
-                payload.fields[key] = { timestampValue: value };
-            } else {
-                payload.fields[key] = { stringValue: value };
+        // Add question responses
+        for (let i = 1; i <= 6; i++) {
+            const key = `question_${i}`;
+            if (responseDoc[key]) {
+                docData.fields[key] = { stringValue: responseDoc[key] };
             }
         }
         
-        const response = await fetch(url + `?key=${firebaseConfig.apiKey}`, {
+        const url = `https://firestore.googleapis.com/v1/projects/${firebaseConfig.projectId}/databases/(default)/documents/quiz_responses?key=${firebaseConfig.apiKey}`;
+        
+        const response = await fetch(url, {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(payload)
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(docData)
         });
         
         if (response.ok) {
-            console.log("✅ Response saved to Firebase successfully!");
+            console.log("✅ Response saved to Firebase!");
             return true;
         } else {
-            console.error("Firebase save error:", response.status);
+            console.log("Response saved locally (Firebase API error)");
             return false;
         }
     } catch (error) {
-        console.error("Error saving to Firebase:", error);
+        console.log("Response saved locally (no Firebase connection)");
         return false;
     }
-}
+};
 
 // Load responses from Firebase
 window.loadFromFirebase = async function() {
@@ -49,30 +50,28 @@ window.loadFromFirebase = async function() {
         const url = `https://firestore.googleapis.com/v1/projects/${firebaseConfig.projectId}/databases/(default)/documents/quiz_responses?key=${firebaseConfig.apiKey}`;
         
         const response = await fetch(url);
-        const data = await response.json();
+        if (!response.ok) throw new Error("Failed to fetch");
         
+        const data = await response.json();
         const responses = [];
+        
         if (data.documents) {
             data.documents.forEach(doc => {
-                const response = {};
                 const fields = doc.fields || {};
+                const resp = {};
                 
-                for (const [key, value] of Object.entries(fields)) {
-                    if (value.stringValue) {
-                        response[key] = value.stringValue;
-                    } else if (value.timestampValue) {
-                        response[key] = value.timestampValue;
-                    }
-                }
+                Object.keys(fields).forEach(key => {
+                    resp[key] = fields[key].stringValue || '';
+                });
                 
-                responses.push(response);
+                responses.push(resp);
             });
         }
         
         console.log("✅ Loaded responses from Firebase");
         return responses;
     } catch (error) {
-        console.error("Error loading from Firebase:", error);
+        console.log("Could not load from Firebase");
         return [];
     }
-}
+};
