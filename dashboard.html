@@ -298,16 +298,25 @@
                 
                 let answersHTML = '<div class="timestamp">📅 ' + (response.timestamp || 'Unknown') + '</div>';
                 
-                for (let i = 1; i <= 6; i++) {
+                for (let i = 1; i <= 10; i++) {
                     const answerKey = `question_${i}`;
                     if (response[answerKey]) {
-                        const questions = [
+                const questions = [
                             "What's your favorite color?",
-                            "What are your hobbies?",
-                            "What do you like about me?",
-                            "What's your favorite music genre?",
-                            "Where's your favorite place to relax?",
-                            "What's one fun fact about you?"
+                            "What's your favorite food or meal?",
+                            "What's your favorite drink?",
+                            "What kind of places do you like to hang out at (mall, park, café, etc.)?",
+                            "What's your favorite type of music?",
+                            "What's your favorite thing to do on weekends?",
+                            "Do you prefer staying in or going out?",
+                            "What's your ideal type of date — chill, fun, or adventurous?",
+                            "What activities do you enjoy (movies, bowling, walking, etc.)?",
+                            "What's something you've always wanted to try on a date?"
+                        ];
+                            "Do you prefer staying in or going out?",
+                            "What's your ideal type of date — chill, fun, or adventurous?",
+                            "What activities do you enjoy (movies, bowling, walking, etc.)?",
+                            "What's something you've always wanted to try on a date?"
                         ];
                         
                         answersHTML += `
@@ -328,18 +337,22 @@
         window.exportToCSV = function() {
             const questions = [
                 "What's your favorite color?",
-                "What are your hobbies?",
-                "What do you like about me?",
-                "What's your favorite music genre?",
-                "Where's your favorite place to relax?",
-                "What's one fun fact about you?"
+                "What's your favorite food or meal?",
+                "What's your favorite drink?",
+                "What kind of places do you like to hang out at (mall, park, café, etc.)?",
+                "What's your favorite type of music?",
+                "What's your favorite thing to do on weekends?",
+                "Do you prefer staying in or going out?",
+                "What's your ideal type of date — chill, fun, or adventurous?",
+                "What activities do you enjoy (movies, bowling, walking, etc.)?",
+                "What's something you've always wanted to try on a date?"
             ];
 
             let csvContent = 'Timestamp,' + questions.map((q, i) => `"Question ${i + 1}: ${q}"`).join(',') + '\n';
 
             allResponses.forEach(response => {
                 const answers = [];
-                for (let i = 1; i <= 6; i++) {
+                for (let i = 1; i <= 10; i++) {
                     answers.push(`"${response[`question_${i}`] || ''}"`);
                 }
                 csvContent += (response.timestamp || 'Unknown') + ',' + answers.join(',') + '\n';

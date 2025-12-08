@@ -7,19 +7,31 @@ const quizData = [
         question: "What's your favorite color?"
     },
     {
-        question: "What are your hobbies?"
+        question: "What's your favorite food or meal?"
     },
     {
-        question: "What do you like about me?"
+        question: "What's your favorite drink?"
     },
     {
-        question: "What's your favorite music genre?"
+        question: "What kind of places do you like to hang out at (mall, park, café, etc.)?"
     },
     {
-        question: "Where's your favorite place to relax?"
+        question: "What's your favorite type of music?"
     },
     {
-        question: "What's one fun fact about you?"
+        question: "What's your favorite thing to do on weekends?"
+    },
+    {
+        question: "Do you prefer staying in or going out?"
+    },
+    {
+        question: "What's your ideal type of date — chill, fun, or adventurous?"
+    },
+    {
+        question: "What activities do you enjoy (movies, bowling, walking, etc.)?"
+    },
+    {
+        question: "What's something you've always wanted to try on a date?"
     }
 ];
 
