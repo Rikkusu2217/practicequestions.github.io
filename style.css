@@ -9,9 +9,11 @@ body {
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     min-height: 100vh;
     display: flex;
+    flex-direction: column;
     justify-content: center;
     align-items: center;
     padding: 20px;
+    padding-bottom: 80px;
 }
 
 .container {
@@ -299,5 +301,10 @@ body {
     .btn {
         padding: 12px 30px;
         font-size: 1em;
+    }
+
+    .profile-picture {
+        width: 120px;
+        height: 120px;
     }
 }
