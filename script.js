@@ -4,34 +4,34 @@ let db = null;
 // Quiz data - Users will provide their own answers
 const quizData = [
     {
-        question: "What's your favorite color?"
+        question: "What is your favorite color?"
     },
     {
-        question: "What's your favorite food or meal?"
+        question: "What is your favorite food or meal?"
     },
     {
-        question: "What's your favorite drink?"
+        question: "What is your favorite drink?"
     },
     {
-        question: "What kind of places do you like to hang out at (mall, park, café, etc.)?"
+        question: "What kind of places do you like to hang out at?"
     },
     {
-        question: "What's your favorite type of music?"
+        question: "What is your favorite type of music?"
     },
     {
-        question: "What's your favorite thing to do on weekends?"
+        question: "What is your favorite thing to do on weekends?"
     },
     {
         question: "Do you prefer staying in or going out?"
     },
     {
-        question: "What's your ideal type of date — chill, fun, or adventurous?"
+        question: "What is your ideal type of hangout — chill, fun, or adventurous?"
     },
     {
-        question: "What activities do you enjoy (movies, bowling, walking, etc.)?"
+        question: "What activities do you enjoy?"
     },
     {
-        question: "What's something you've always wanted to try on a date?"
+        question: "Are you free on December 20th?"
     }
 ];
 
